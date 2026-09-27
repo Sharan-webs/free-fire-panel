@@ -1,3 +1,1 @@
-#!/bin/sh
-APP_HOME="$(cd "$(dirname "$0")" && pwd)"
-exec /opt/gradle/gradle-8.4/bin/gradle "$@"
+Host not in allowlist: raw.githubusercontent.com. Add this host to your network egress settings to allow access.
