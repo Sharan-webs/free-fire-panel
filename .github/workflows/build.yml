@@ -1,4 +1,4 @@
-name: Build FF Headshot APK
+name: Build FF Panel APK
 
 on:
   push:
@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,30 +20,36 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '17'
-          distribution: 'zulu'
+          distribution: 'temurin'
 
-      - name: Use pre-installed Android SDK
+      - name: Accept SDK Licenses
         run: |
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Install Gradle 8.4 + Generate Wrapper
+      - name: Install SDK Platform 34
+        run: |
+          /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+
+      - name: Install Gradle 8.4
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
           sudo unzip -q /tmp/gradle.zip -d /opt/gradle
-          sudo ln -sf /opt/gradle/gradle-8.4/bin/gradle /usr/local/bin/gradle
-          gradle wrapper --gradle-version 8.4
+
+      - name: Generate Gradle Wrapper
+        run: |
+          /opt/gradle/gradle-8.4/bin/gradle wrapper --gradle-version 8.4
           chmod +x gradlew
-          ls gradle/wrapper/
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          export PATH=$PATH:/usr/local/lib/android/sdk/platform-tools
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: crt-headshot-apk
+          name: ff-headshot-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

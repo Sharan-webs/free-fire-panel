@@ -1,7 +1,3 @@
 #!/bin/sh
-#
-# Gradle start up script for UN*X
-#
 APP_HOME="$(cd "$(dirname "$0")" && pwd)"
-CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
-exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+exec /opt/gradle/gradle-8.4/bin/gradle "$@"
