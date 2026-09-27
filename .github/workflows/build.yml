@@ -18,24 +18,21 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Install Gradle 8.4
+      - name: Use pre-installed Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Install Gradle 8.4 + Generate Wrapper
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
           sudo unzip -q /tmp/gradle.zip -d /opt/gradle
           sudo ln -sf /opt/gradle/gradle-8.4/bin/gradle /usr/local/bin/gradle
-
-      - name: Download Gradle Wrapper JAR
-        run: |
-          mkdir -p gradle/wrapper
-          wget -q "https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar" \
-            -O gradle/wrapper/gradle-wrapper.jar
+          gradle wrapper --gradle-version 8.4
           chmod +x gradlew
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses || true
+          ls gradle/wrapper/
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
