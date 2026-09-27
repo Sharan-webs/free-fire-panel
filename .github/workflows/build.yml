@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -17,17 +17,26 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: gradle
+
+      - name: Install Gradle 8.4
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
+          sudo unzip -q /tmp/gradle.zip -d /opt/gradle
+          sudo ln -sf /opt/gradle/gradle-8.4/bin/gradle /usr/local/bin/gradle
+          gradle --version
+
+      - name: Download Gradle Wrapper JAR
+        run: |
+          mkdir -p gradle/wrapper
+          wget -q "https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar" \
+            -O gradle/wrapper/gradle-wrapper.jar
+          chmod +x gradlew
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Generate Gradle Wrapper
-        run: |
-          gradle wrapper --gradle-version 8.4 --distribution-type bin
-
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses || true
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
@@ -35,6 +44,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: freee-headshot-apk
+          name: crt-headshot-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
