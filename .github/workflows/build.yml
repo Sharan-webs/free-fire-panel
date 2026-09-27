@@ -26,26 +26,24 @@ jobs:
         run: |
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Install SDK Platform 34
+      - name: Install SDK Platform 33
         run: |
           /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
+            "platforms;android-33" \
+            "build-tools;33.0.1"
 
-      - name: Install Gradle 8.4
+      - name: Install Gradle 7.6.1
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
+          wget -q https://services.gradle.org/distributions/gradle-7.6.1-bin.zip -O /tmp/gradle.zip
           sudo unzip -q /tmp/gradle.zip -d /opt/gradle
 
       - name: Generate Gradle Wrapper
         run: |
-          /opt/gradle/gradle-8.4/bin/gradle wrapper --gradle-version 8.4
+          /opt/gradle/gradle-7.6.1/bin/gradle wrapper --gradle-version 7.6.1
           chmod +x gradlew
 
       - name: Build Debug APK
-        run: |
-          export PATH=$PATH:/usr/local/lib/android/sdk/platform-tools
-          ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
